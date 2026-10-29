@@ -39,9 +39,10 @@ function readNumberEnv(name, fallback, { min, max }) {
 const maxWidth = readNumberEnv("IMAGE_MAX_WIDTH", 2200, { min: 1, max: 20000 });
 const maxHeight = readNumberEnv("IMAGE_MAX_HEIGHT", 2200, { min: 1, max: 20000 });
 const quality = readNumberEnv("IMAGE_WEBP_QUALITY", 72, { min: 1, max: 100 });
-const concurrency = Math.min(
-  readNumberEnv("IMAGE_CONCURRENCY", 4, { min: 1, max: 64 }),
-  cpus().length
+// `cpus()` can come back empty on some hosts, so keep a floor of one worker.
+const concurrency = Math.max(
+  1,
+  Math.min(readNumberEnv("IMAGE_CONCURRENCY", 4, { min: 1, max: 64 }), cpus().length)
 );
 const rasterExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 const ignoredFileNames = new Set([".DS_Store", "Thumbs.db"]);
@@ -65,11 +66,19 @@ const duplicatesPath = path.join(
 const manifest = {};
 
 // Near-duplicate detection: burst frames of the same pose are kept on disk but
-// hidden from the page. 8 bits of a 64-bit dHash is the line that held on the
-// pre-wedding set — distinct photos started colliding at 9.
-const duplicateThreshold = readNumberEnv("IMAGE_DUPLICATE_THRESHOLD", 8, {
+// hidden from the page. 12 of the 64 dHash bits catches a burst that drifts
+// (someone turns, the frame shifts) without the colour check below ever
+// letting unrelated photos through.
+const duplicateThreshold = readNumberEnv("IMAGE_DUPLICATE_THRESHOLD", 12, {
   min: 0,
   max: 64
+});
+// Shape alone is not enough: guests photographed one after another against the
+// same backdrop land inside the hash threshold. Colour tells them apart, so a
+// frame counts as a repeat only when both agree.
+const duplicateColourThreshold = readNumberEnv("IMAGE_DUPLICATE_COLOUR", 20, {
+  min: 0,
+  max: 255
 });
 const duplicates = [];
 
@@ -83,6 +92,25 @@ function toPublicPath(absolutePath) {
     .relative(path.join(projectRoot, "public"), absolutePath)
     .split(path.sep)
     .join("/")}`;
+}
+
+/** Mean per-channel difference between two 16x16 RGB thumbnails, 0-255. */
+function colourDistance(a, b) {
+  let total = 0;
+
+  for (let index = 0; index < a.length; index += 1) {
+    total += Math.abs(a[index] - b[index]);
+  }
+
+  return total / a.length;
+}
+
+async function colourThumbnail(filePath) {
+  return sharp(filePath)
+    .resize(16, 16, { fit: "fill" })
+    .removeAlpha()
+    .raw()
+    .toBuffer();
 }
 
 /**
@@ -142,7 +170,13 @@ async function collectDuplicates(fullWebpFiles) {
 
   for (const filePath of fullWebpFiles) {
     const folder = path.dirname(filePath);
-    byFolder.set(folder, [...(byFolder.get(folder) ?? []), filePath]);
+    const folderFiles = byFolder.get(folder);
+
+    if (folderFiles) {
+      folderFiles.push(filePath);
+    } else {
+      byFolder.set(folder, [filePath]);
+    }
   }
 
   for (const [, folderFiles] of byFolder) {
@@ -153,11 +187,14 @@ async function collectDuplicates(fullWebpFiles) {
     // Hash the full-size files, not the variants: an already-downscaled
     // variant blurs detail and pushes distinct frames inside the threshold.
     // Hashing is the slow part, so it runs through the same worker pool.
-    const hashes = new Array(ordered.length);
+    const signatures = new Array(ordered.length);
 
     await runPool(
       ordered.map((filePath, index) => async () => {
-        hashes[index] = await perceptualHash(filePath);
+        signatures[index] = {
+          hash: await perceptualHash(filePath),
+          colour: await colourThumbnail(filePath)
+        };
         return false;
       })
     );
@@ -165,15 +202,18 @@ async function collectDuplicates(fullWebpFiles) {
     const kept = [];
 
     ordered.forEach((filePath, index) => {
-      const hash = hashes[index];
+      const signature = signatures[index];
       const isRepeat = kept.some(
-        (keeper) => hammingDistance(keeper, hash) <= duplicateThreshold
+        (keeper) =>
+          hammingDistance(keeper.hash, signature.hash) <= duplicateThreshold &&
+          colourDistance(keeper.colour, signature.colour) <=
+            duplicateColourThreshold
       );
 
       if (isRepeat) {
         duplicates.push(toPublicPath(filePath));
       } else {
-        kept.push(hash);
+        kept.push(signature);
       }
     });
   }
@@ -374,7 +414,7 @@ async function optimizeRoot(root) {
   await collectDuplicates(fullWebpFiles);
 
   console.log(
-    `Hid ${duplicates.length - before} near-duplicate ${root.name} images (hamming <= ${duplicateThreshold}); files stay on disk.`
+    `Hid ${duplicates.length - before} near-duplicate ${root.name} images (hamming <= ${duplicateThreshold} and colour <= ${duplicateColourThreshold}); files stay on disk.`
   );
 }
 

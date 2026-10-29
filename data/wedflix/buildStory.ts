@@ -34,30 +34,29 @@ function toRowCards(rowId: string, images: string[]): WedflixPhotoCard[] {
 }
 
 /**
- * Every frame on disk, before near-duplicates are dropped — the billboard and
- * the avatars may point at one of them.
+ * Reads each event folder once. `rows` drop near-duplicate frames and empty
+ * events, while `allFrames` keeps everything on disk, because the billboard
+ * and the avatars may point at a frame the rows hide.
  */
-function buildAllFrames(config: WedflixStoryConfig): string[] {
-  return config.events.flatMap((event) => fromEventFolder(event.folder));
-}
+function readEvents(config: WedflixStoryConfig): {
+  rows: WedflixPhotoRow[];
+  allFrames: string[];
+} {
+  const events = config.events.map((event) => ({
+    id: slugifyTitle(event.folder),
+    title: event.title ?? toRowTitle(event.folder),
+    images: fromEventFolder(event.folder)
+  }));
 
-/**
- * Events with no optimized photos yet are left off the page entirely, and
- * near-duplicate frames are left out of the rows and the lightbox.
- */
-function buildRows(config: WedflixStoryConfig): WedflixPhotoRow[] {
-  return config.events
-    .map((event) => {
-      const title = event.title ?? toRowTitle(event.folder);
-      const id = slugifyTitle(event.folder);
-      const images = fromEventFolder(event.folder).filter(
-        (image) => !isDuplicate(image)
-      );
-
-      return { id, title, images };
-    })
+  const rows = events
+    .map((event) => ({
+      ...event,
+      images: event.images.filter((image) => !isDuplicate(image))
+    }))
     .filter((row) => row.images.length > 0)
     .map((row) => ({ ...row, cards: toRowCards(row.id, row.images) }));
+
+  return { rows, allFrames: events.flatMap((event) => event.images) };
 }
 
 /**
@@ -77,8 +76,8 @@ function makeFramePicker(allImages: string[]) {
 }
 
 export function buildStory(config: WedflixStoryConfig): WedflixStory {
-  const photoRows = buildRows(config);
-  const pickFrame = makeFramePicker(buildAllFrames(config));
+  const { rows: photoRows, allFrames } = readEvents(config);
+  const pickFrame = makeFramePicker(allFrames);
 
   return {
     brandName: config.brandName,

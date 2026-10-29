@@ -45,15 +45,28 @@ be listed before they are shot.
 
 ## Repeated photos
 
-Burst frames of the same pose are detected by the optimizer (a perceptual hash,
-Hamming distance <= 8) and listed in `data/generated/duplicates.json`. The files
-stay on disk — they are only left out of the rows and the lightbox, so each pose
-shows once. The first frame of every burst is the one kept.
+Burst frames of the same pose are detected by the optimizer and listed in
+`data/generated/duplicates.json`. The files stay on disk — they are only left
+out of the rows and the lightbox, so each pose shows once. The first frame of
+every burst is the one kept.
 
-Too aggressive or too lax? Re-run with a different threshold:
+Two signals have to agree before a frame is called a repeat:
+
+| Check | Default | Why |
+|---|---|---|
+| `IMAGE_DUPLICATE_THRESHOLD` | 12 | Shape: Hamming distance between 64-bit perceptual hashes |
+| `IMAGE_DUPLICATE_COLOUR` | 20 | Colour: mean difference between 16x16 RGB thumbnails |
+
+The colour check exists because guests photographed one after another against
+the same backdrop have near-identical shape hashes — without it, different
+people get hidden as "repeats".
+
+Too aggressive or too lax? Re-run with different limits:
 
 ```bash
-IMAGE_DUPLICATE_THRESHOLD=6 npm run images:optimize   # hides fewer
+IMAGE_DUPLICATE_THRESHOLD=8 npm run images:optimize    # hides fewer
+IMAGE_DUPLICATE_COLOUR=15 npm run images:optimize     # hides fewer
+IMAGE_DUPLICATE_COLOUR=24 npm run images:optimize     # hides more
 ```
 
 A hand-picked `billboard` or avatar `frame` still works even if that exact
