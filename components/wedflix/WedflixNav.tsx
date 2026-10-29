@@ -32,14 +32,14 @@ export function WedflixNav({
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         isScrolled
-          ? "bg-[#141414]"
+          ? "bg-[#14110f]"
           : "bg-[linear-gradient(180deg,rgba(0,0,0,0.75)_0%,transparent_100%)]"
       }`}
     >
       <div className="flex items-center gap-4 px-4 py-3 sm:gap-8 sm:px-8 lg:px-12">
         <Link
           href="#top"
-          className="text-xl font-extrabold uppercase tracking-tight text-[#e50914] sm:text-2xl"
+          className="text-xl font-extrabold uppercase tracking-tight text-[#d4a24c] sm:text-2xl"
         >
           {brandName}
         </Link>

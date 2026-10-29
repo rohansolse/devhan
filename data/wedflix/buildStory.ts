@@ -12,7 +12,7 @@ import type {
 } from "@/data/wedflix/types";
 
 const MAX_ROW_CARDS = 14;
-const DEFAULT_RANK = "#1 in Love Stories Today";
+const DEFAULT_RANK = "Every event, in the order it happened";
 
 /**
  * Spreads the row cards evenly across the collection so the strip previews the

@@ -14,7 +14,6 @@ import { PhotoLightbox } from "@/components/wedflix/PhotoLightbox";
 import { ProfileGate } from "@/components/wedflix/ProfileGate";
 import { WedflixImage } from "@/components/wedflix/WedflixImage";
 import { WedflixIntro } from "@/components/wedflix/WedflixIntro";
-import { WedflixPreloader } from "@/components/wedflix/WedflixPreloader";
 import { WedflixNav } from "@/components/wedflix/WedflixNav";
 
 const CARD_SIZES = "(max-width: 640px) 60vw, (max-width: 1024px) 32vw, 20vw";
@@ -31,7 +30,6 @@ type WedflixExperienceProps = {
 export function WedflixExperience({ story }: WedflixExperienceProps) {
   const [introDone, setIntroDone] = useState(false);
   const [profile, setProfile] = useState<WedflixProfile | null>(null);
-  const [beamsPlaying, setBeamsPlaying] = useState(false);
   const [activeFilm, setActiveFilm] = useState<WedflixFilm | null>(null);
   const [lightbox, setLightbox] = useState<LightboxState | null>(null);
 
@@ -39,17 +37,7 @@ export function WedflixExperience({ story }: WedflixExperienceProps) {
   // The gate only makes sense once there are avatars to show, which needs photos.
   const gateOpen = story.profiles.length > 0 && !profile;
   const isOverlayOpen =
-    !introDone ||
-    gateOpen ||
-    beamsPlaying ||
-    Boolean(activeFilm) ||
-    Boolean(lightbox);
-
-  // Selecting a profile plays a short color-beam transition into the gallery.
-  const handleSelectProfile = (selected: WedflixProfile) => {
-    setProfile(selected);
-    setBeamsPlaying(true);
-  };
+    !introDone || gateOpen || Boolean(activeFilm) || Boolean(lightbox);
 
   useEffect(() => {
     if (!isOverlayOpen) {
@@ -70,7 +58,7 @@ export function WedflixExperience({ story }: WedflixExperienceProps) {
   ];
 
   return (
-    <div id="top" className="min-h-screen overflow-x-hidden bg-[#141414] text-white">
+    <div id="top" className="min-h-screen overflow-x-hidden bg-[#14110f] text-white">
       {/* Overlays sit outside this wrapper, so `inert` keeps focus from tabbing
           behind the profile gate, the film modal, or the lightbox. */}
       <div inert={isOverlayOpen}>
@@ -175,16 +163,12 @@ export function WedflixExperience({ story }: WedflixExperienceProps) {
       {/* The gate sits behind the intro (lower z-index) so that when the intro
           fades out it reveals the gate — never a flash of the gallery behind. */}
       {gateOpen ? (
-        <ProfileGate profiles={story.profiles} onSelect={handleSelectProfile} />
+        <ProfileGate profiles={story.profiles} onSelect={setProfile} />
       ) : null}
 
       {introDone ? null : (
         <WedflixIntro brandName={story.brandName} onFinish={() => setIntroDone(true)} />
       )}
-
-      {beamsPlaying ? (
-        <WedflixPreloader onFinish={() => setBeamsPlaying(false)} />
-      ) : null}
 
       {activeFilm ? (
         <FilmModal film={activeFilm} onClose={() => setActiveFilm(null)} />

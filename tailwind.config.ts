@@ -8,8 +8,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        netflix: "#e50914",
-        shell: "#141414"
+        accent: "#d4a24c",
+        shell: "#14110f"
       }
     }
   },

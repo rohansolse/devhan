@@ -1,8 +1,8 @@
 # Devhan
 
-A Netflix-style page for Devani & Rohan's wedding — one row per event, a
-full-screen lightbox per gallery, and the opening ident before the profile gate.
-Built with Next.js as a static export, same pattern as MBRJ Wedflix.
+A private page for Devani & Rohan's wedding — one scrollable row per event, a
+full-screen lightbox per gallery, and a title card before the profile picker.
+Built with Next.js as a static export.
 
 ## Running it
 

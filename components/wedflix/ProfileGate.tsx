@@ -10,9 +10,9 @@ type ProfileGateProps = {
 
 export function ProfileGate({ profiles, onSelect }: ProfileGateProps) {
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#141414] px-6">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#14110f] px-6">
       <h1 className="text-center text-3xl font-medium text-white sm:text-5xl lg:text-6xl">
-        Who&apos;s watching?
+        Who&apos;s joining the celebration?
       </h1>
 
       {/* Centred flex-wrap with widths tuned so four avatars always fit one row

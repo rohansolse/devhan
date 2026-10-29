@@ -23,7 +23,7 @@ export function Billboard({ story, onPlay, onMoreInfo }: BillboardProps) {
           className="absolute inset-0 h-full w-full object-cover object-[35%_30%]"
         />
       ) : null}
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.15)_35%,rgba(20,20,20,0.9)_88%,#141414_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0.15)_35%,rgba(20,17,15,0.9)_88%,#14110f_100%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.8)_0%,rgba(0,0,0,0.35)_45%,transparent_75%)]" />
 
       <div className="relative flex min-h-[80vh] flex-col justify-end px-4 pb-16 sm:min-h-screen sm:px-8 sm:pb-24 lg:px-12">
@@ -34,21 +34,15 @@ export function Billboard({ story, onPlay, onMoreInfo }: BillboardProps) {
 
           <h1 className="font-display mt-4 flex flex-wrap items-baseline gap-x-3 text-4xl font-semibold leading-tight text-white sm:text-7xl sm:leading-none lg:text-8xl">
             <span>{story.brideName}</span>
-            <span className="text-xl font-normal tracking-[0.3em] text-[#e50914] sm:text-3xl">
+            <span className="text-xl font-normal tracking-[0.3em] text-[#d4a24c] sm:text-3xl">
               WEDS
             </span>
             <span>{story.groomName}</span>
           </h1>
 
-          <div className="mt-6 flex items-center gap-3">
-            <span className="flex flex-col items-center justify-center rounded-sm bg-[#e50914] px-1.5 py-0.5 text-[0.6rem] font-bold leading-tight text-white">
-              <span>TOP</span>
-              <span className="text-sm">10</span>
-            </span>
-            <span className="text-base font-medium text-white sm:text-lg">
-              {story.rank}
-            </span>
-          </div>
+          <p className="mt-6 text-base font-medium text-white/90 sm:text-lg">
+            {story.rank}
+          </p>
 
           <p className="mt-5 max-w-xl text-sm leading-7 text-white/90 sm:text-lg sm:leading-8">
             {story.tagline}

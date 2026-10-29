@@ -14,7 +14,7 @@ const storyConfig: WedflixStoryConfig = {
   seriesTitle: "A Love Story in Five Parts",
   tagline:
     "From the first pre-wedding frame to the last vow — turmeric, laughter, two families and one forever.",
-  genres: ["Romance", "Celebration", "Family"],
+  genres: ["Pre-Wedding", "Engagement", "Haldi", "Wedding"],
   // Filename stems, e.g. "_RJL5250" for _RJL5250.jpg. Leave unset and the page
   // picks frames automatically until you choose them.
   billboard: "_MG_2973",

@@ -80,7 +80,7 @@ function RowArrow({
       type="button"
       onClick={onClick}
       aria-label={direction === "left" ? "Scroll left" : "Scroll right"}
-      className={`absolute top-0 bottom-4 z-10 hidden w-10 items-center justify-center bg-[rgba(20,20,20,0.6)] text-white opacity-0 transition hover:bg-[rgba(20,20,20,0.85)] focus-visible:opacity-100 group-hover/row:opacity-100 sm:flex lg:w-12 ${
+      className={`absolute top-0 bottom-4 z-10 hidden w-10 items-center justify-center bg-[rgba(20,17,15,0.6)] text-white opacity-0 transition hover:bg-[rgba(20,17,15,0.85)] focus-visible:opacity-100 group-hover/row:opacity-100 sm:flex lg:w-12 ${
         direction === "left" ? "left-0" : "right-0"
       }`}
     >
