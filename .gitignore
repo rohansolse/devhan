@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+.DS_Store
+tsconfig.tsbuildinfo
+
+# Raw JPGs are never tracked — run `npm run images:optimize` to generate the
+# WebPs under public/images/optimized/, which is what gets deployed. The event
+# folders themselves are kept (via .gitkeep) so a fresh clone has them ready.
+source-images/events/**
+!source-images/events/**/
+!source-images/events/**/.gitkeep
