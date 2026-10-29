@@ -15,16 +15,33 @@ const imageRoots = [
   }
 ];
 
-const maxWidth = Number(process.env.IMAGE_MAX_WIDTH ?? 2200);
-const maxHeight = Number(process.env.IMAGE_MAX_HEIGHT ?? 2200);
-const quality = Number(process.env.IMAGE_WEBP_QUALITY ?? 72);
-const requestedConcurrency = Number(process.env.IMAGE_CONCURRENCY);
-const concurrency = Math.max(
-  1,
-  Math.min(
-    Number.isFinite(requestedConcurrency) ? requestedConcurrency : 4,
-    cpus().length
-  )
+/**
+ * Env overrides are opt-in: anything unset, blank or out of range falls back to
+ * the documented default rather than quietly becoming 0.
+ */
+function readNumberEnv(name, fallback, { min, max }) {
+  const raw = process.env[name]?.trim();
+
+  if (!raw) {
+    return fallback;
+  }
+
+  const value = Number(raw);
+
+  if (!Number.isFinite(value) || value < min || value > max) {
+    console.warn(`Ignoring ${name}="${raw}" (expected ${min}-${max}); using ${fallback}.`);
+    return fallback;
+  }
+
+  return value;
+}
+
+const maxWidth = readNumberEnv("IMAGE_MAX_WIDTH", 2200, { min: 1, max: 20000 });
+const maxHeight = readNumberEnv("IMAGE_MAX_HEIGHT", 2200, { min: 1, max: 20000 });
+const quality = readNumberEnv("IMAGE_WEBP_QUALITY", 72, { min: 1, max: 100 });
+const concurrency = Math.min(
+  readNumberEnv("IMAGE_CONCURRENCY", 4, { min: 1, max: 64 }),
+  cpus().length
 );
 const rasterExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 const ignoredFileNames = new Set([".DS_Store", "Thumbs.db"]);
@@ -50,10 +67,10 @@ const manifest = {};
 // Near-duplicate detection: burst frames of the same pose are kept on disk but
 // hidden from the page. 8 bits of a 64-bit dHash is the line that held on the
 // pre-wedding set — distinct photos started colliding at 9.
-const requestedThreshold = Number(process.env.IMAGE_DUPLICATE_THRESHOLD);
-const duplicateThreshold = Number.isFinite(requestedThreshold)
-  ? requestedThreshold
-  : 8;
+const duplicateThreshold = readNumberEnv("IMAGE_DUPLICATE_THRESHOLD", 8, {
+  min: 0,
+  max: 64
+});
 const duplicates = [];
 
 function toVariantPath(fullWebpPath, width) {
@@ -80,51 +97,85 @@ async function perceptualHash(filePath) {
     .raw()
     .toBuffer();
 
-  let bits = 0n;
+  // One byte per row of the thumbnail: bit set when a pixel is brighter than
+  // the one to its right.
+  const hash = Buffer.alloc(8);
 
   for (let y = 0; y < 8; y += 1) {
+    let row = 0;
+
     for (let x = 0; x < 8; x += 1) {
-      bits = (bits << 1n) | (pixels[y * 9 + x] > pixels[y * 9 + x + 1] ? 1n : 0n);
+      row = (row << 1) | (pixels[y * 9 + x] > pixels[y * 9 + x + 1] ? 1 : 0);
     }
+
+    hash[y] = row;
   }
 
-  return bits;
+  return hash;
 }
 
+const POPCOUNT = Uint8Array.from({ length: 256 }, (_, byte) =>
+  byte
+    .toString(2)
+    .split("")
+    .reduce((total, bit) => total + Number(bit), 0)
+);
+
 function hammingDistance(a, b) {
-  let remaining = a ^ b;
   let distance = 0;
 
-  while (remaining) {
-    distance += Number(remaining & 1n);
-    remaining >>= 1n;
+  for (let index = 0; index < a.length; index += 1) {
+    distance += POPCOUNT[a[index] ^ b[index]];
   }
 
   return distance;
 }
 
 /**
- * Walks the images in display order and marks each one that is within the
- * threshold of an earlier keeper, so the first shot of every burst survives.
+ * Walks one folder's images in display order and marks each one that is within
+ * the threshold of an earlier keeper, so the first shot of every burst
+ * survives. Folders are compared separately: two events can legitimately hold
+ * similar frames, and an event must never be emptied by an earlier one.
  */
 async function collectDuplicates(fullWebpFiles) {
-  const kept = [];
+  const byFolder = new Map();
 
-  for (const filePath of [...fullWebpFiles].sort((a, b) =>
-    a.localeCompare(b, "en", { numeric: true })
-  )) {
-    // Hash the full-size file, not a variant: the already-downscaled variant
-    // blurs detail and pushes distinct frames inside the threshold.
-    const hash = await perceptualHash(filePath);
-    const match = kept.find(
-      (keeper) => hammingDistance(keeper.hash, hash) <= duplicateThreshold
+  for (const filePath of fullWebpFiles) {
+    const folder = path.dirname(filePath);
+    byFolder.set(folder, [...(byFolder.get(folder) ?? []), filePath]);
+  }
+
+  for (const [, folderFiles] of byFolder) {
+    const ordered = folderFiles.sort((a, b) =>
+      a.localeCompare(b, "en", { numeric: true })
     );
 
-    if (match) {
-      duplicates.push(toPublicPath(filePath));
-    } else {
-      kept.push({ hash });
-    }
+    // Hash the full-size files, not the variants: an already-downscaled
+    // variant blurs detail and pushes distinct frames inside the threshold.
+    // Hashing is the slow part, so it runs through the same worker pool.
+    const hashes = new Array(ordered.length);
+
+    await runPool(
+      ordered.map((filePath, index) => async () => {
+        hashes[index] = await perceptualHash(filePath);
+        return false;
+      })
+    );
+
+    const kept = [];
+
+    ordered.forEach((filePath, index) => {
+      const hash = hashes[index];
+      const isRepeat = kept.some(
+        (keeper) => hammingDistance(keeper, hash) <= duplicateThreshold
+      );
+
+      if (isRepeat) {
+        duplicates.push(toPublicPath(filePath));
+      } else {
+        kept.push(hash);
+      }
+    });
   }
 }
 

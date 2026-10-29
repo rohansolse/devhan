@@ -36,6 +36,9 @@ function readDirSafe(dir: string) {
   }
 }
 
+/** One readdir per folder per build, however many times it is asked for. */
+const folderCache = new Map<string, string[]>();
+
 /**
  * Images dropped into `source-images/events/<folder>/` and converted by
  * `npm run images:optimize`. Read from disk, so adding photos needs no code.
@@ -43,9 +46,15 @@ function readDirSafe(dir: string) {
  * keeps the site building before an event has been shot.
  */
 export function fromEventFolder(folder: string) {
+  const cached = folderCache.get(folder);
+
+  if (cached) {
+    return cached;
+  }
+
   const dir = path.join(EVENTS_OUTPUT_DIR, folder);
 
-  return readDirSafe(dir)
+  const images = readDirSafe(dir)
     .filter(
       (entry) =>
         entry.isFile() &&
@@ -55,6 +64,10 @@ export function fromEventFolder(folder: string) {
     .map((entry) => entry.name)
     .sort((a, b) => a.localeCompare(b, "en", { numeric: true }))
     .map((name) => `${EVENTS_PUBLIC_PREFIX}/${folder}/${name}`);
+
+  folderCache.set(folder, images);
+
+  return images;
 }
 
 export function toRowTitle(folder: string) {
