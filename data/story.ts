@@ -17,12 +17,12 @@ const storyConfig: WedflixStoryConfig = {
   genres: ["Romance", "Celebration", "Family"],
   // Filename stems, e.g. "_RJL5250" for _RJL5250.jpg. Leave unset and the page
   // picks frames automatically until you choose them.
-  billboard: undefined,
+  billboard: "_MG_2973",
   profiles: [
-    { name: "Rohan" },
-    { name: "Devani" },
-    { name: "Family" },
-    { name: "Friends" }
+    { name: "Rohan", frame: "_MG_2712" },
+    { name: "Devani", frame: "_MG_2565" },
+    { name: "Family", frame: "_MG_2526" },
+    { name: "Friends", frame: "_MG_2489" }
   ],
   // Add YouTube films here once they are up; the row disappears when empty.
   films: [],
