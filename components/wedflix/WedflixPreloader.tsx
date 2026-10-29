@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { withBasePath } from "@/data/basePath";
 
 type WedflixPreloaderProps = {
   /** Fired once the ident video has finished (or failed / timed out). */
@@ -12,7 +13,7 @@ type WedflixPreloaderProps = {
 // clip play with sound, so the sting comes from the video itself. The asset is
 // self-hosted under public/; if it ever fails or stalls, the safety timer still
 // reveals the page.
-const PRELOADER_SRC = "/videos/preloader.mp4";
+const PRELOADER_SRC = withBasePath("/videos/preloader.mp4");
 const MAX_WAIT = 5000;
 
 export function WedflixPreloader({ onFinish }: WedflixPreloaderProps) {

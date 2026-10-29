@@ -1,4 +1,5 @@
 import imageVariants from "@/data/generated/image-variants.json";
+import { withBasePath } from "@/data/basePath";
 
 /**
  * Written by scripts/optimize-images.mjs: every optimized image mapped to its
@@ -15,7 +16,7 @@ const variantManifest = imageVariants as unknown as Record<
 >;
 
 export function toImageSrc(sourcePath: string) {
-  return encodeURI(sourcePath);
+  return encodeURI(withBasePath(sourcePath));
 }
 
 export function toResponsiveSrcSet(sourcePath: string) {
@@ -28,6 +29,6 @@ export function toResponsiveSrcSet(sourcePath: string) {
   }
 
   return candidates
-    .map(([path, width]) => `${encodeURI(path)} ${width}w`)
+    .map(([path, width]) => `${encodeURI(withBasePath(path))} ${width}w`)
     .join(", ");
 }

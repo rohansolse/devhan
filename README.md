@@ -35,6 +35,17 @@ for folder naming, extra events, and picking the hero frame.
 | `source-images/events/` | Raw edited JPGs (not committed) |
 | `public/images/optimized/events/` | Generated WebPs (committed, deployed) |
 
+## Deploying
+
+Pushing to `main` runs [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml),
+which builds the static export and publishes it to GitHub Pages at
+<https://rohansolse.github.io/devhan/>. The workflow sets
+`NEXT_PUBLIC_BASE_PATH=/devhan` because a project site is served from a
+subfolder; local builds leave it empty and run at `/`.
+
+The first run also switches the repo's Pages source from "Deploy from a branch"
+to "GitHub Actions" — until then Pages serves this README instead of the site.
+
 ## Checks
 
 ```bash
