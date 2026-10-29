@@ -1,10 +1,10 @@
 "use client";
 
-import type { WedflixStory } from "@/data/wedflix/types";
-import { WedflixImage } from "@/components/wedflix/WedflixImage";
+import type { Story } from "@/data/gallery/types";
+import { StoryImage } from "@/components/story/StoryImage";
 
 type BillboardProps = {
-  story: WedflixStory;
+  story: Story;
   /** Omitted when there is no film yet, which hides the Play button. */
   onPlay?: () => void;
   onMoreInfo: () => void;
@@ -15,7 +15,7 @@ export function Billboard({ story, onPlay, onMoreInfo }: BillboardProps) {
     <section className="relative min-h-[80vh] w-full sm:min-h-screen">
       {/* No photos on disk yet — the gradients alone carry the hero. */}
       {story.billboardImage ? (
-        <WedflixImage
+        <StoryImage
           src={story.billboardImage}
           alt={`${story.brideName} and ${story.groomName}`}
           sizes="100vw"
@@ -34,7 +34,7 @@ export function Billboard({ story, onPlay, onMoreInfo }: BillboardProps) {
 
           <h1 className="font-display mt-4 flex flex-wrap items-baseline gap-x-3 text-4xl font-semibold leading-tight text-white sm:text-7xl sm:leading-none lg:text-8xl">
             <span>{story.brideName}</span>
-            <span className="text-xl font-normal tracking-[0.3em] text-[#d4a24c] sm:text-3xl">
+            <span className="text-xl font-normal tracking-[0.3em] text-accent sm:text-3xl">
               WEDS
             </span>
             <span>{story.groomName}</span>

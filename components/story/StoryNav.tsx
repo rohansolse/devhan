@@ -2,22 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { WedflixProfile } from "@/data/wedflix/types";
-import { WedflixImage } from "@/components/wedflix/WedflixImage";
+import type { Profile } from "@/data/gallery/types";
+import { StoryImage } from "@/components/story/StoryImage";
 
-type WedflixNavProps = {
+type StoryNavProps = {
   brandName: string;
   rowLinks: { id: string; title: string }[];
-  profile: WedflixProfile | null;
+  profile: Profile | null;
   onSwitchProfile: () => void;
 };
 
-export function WedflixNav({
+export function StoryNav({
   brandName,
   rowLinks,
   profile,
   onSwitchProfile
-}: WedflixNavProps) {
+}: StoryNavProps) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -32,14 +32,14 @@ export function WedflixNav({
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         isScrolled
-          ? "bg-[#14110f]"
+          ? "bg-shell"
           : "bg-[linear-gradient(180deg,rgba(0,0,0,0.75)_0%,transparent_100%)]"
       }`}
     >
       <div className="flex items-center gap-4 px-4 py-3 sm:gap-8 sm:px-8 lg:px-12">
         <Link
           href="#top"
-          className="text-xl font-extrabold uppercase tracking-tight text-[#d4a24c] sm:text-2xl"
+          className="text-xl font-extrabold uppercase tracking-tight text-accent sm:text-2xl"
         >
           {brandName}
         </Link>
@@ -68,7 +68,7 @@ export function WedflixNav({
             className="ml-auto flex shrink-0 items-center gap-2 text-sm text-white"
             aria-label="Switch profile"
           >
-            <WedflixImage
+            <StoryImage
               src={profile.image}
               alt=""
               sizes="2rem"

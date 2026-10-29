@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import type { WedflixFilm } from "@/data/wedflix/types";
+import type { Film } from "@/data/gallery/types";
 
 type FilmModalProps = {
-  film: WedflixFilm;
+  film: Film;
   onClose: () => void;
 };
 

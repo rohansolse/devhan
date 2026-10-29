@@ -2,35 +2,35 @@
 
 import { useEffect, useState } from "react";
 import type {
-  WedflixFilm,
-  WedflixPhotoRow,
-  WedflixProfile,
-  WedflixStory
-} from "@/data/wedflix/types";
-import { Billboard } from "@/components/wedflix/Billboard";
-import { CardRow } from "@/components/wedflix/CardRow";
-import { FilmModal } from "@/components/wedflix/FilmModal";
-import { PhotoLightbox } from "@/components/wedflix/PhotoLightbox";
-import { ProfileGate } from "@/components/wedflix/ProfileGate";
-import { WedflixImage } from "@/components/wedflix/WedflixImage";
-import { WedflixIntro } from "@/components/wedflix/WedflixIntro";
-import { WedflixNav } from "@/components/wedflix/WedflixNav";
+  Film,
+  PhotoRow,
+  Profile,
+  Story
+} from "@/data/gallery/types";
+import { Billboard } from "@/components/story/Billboard";
+import { CardRow } from "@/components/story/CardRow";
+import { FilmModal } from "@/components/story/FilmModal";
+import { PhotoLightbox } from "@/components/story/PhotoLightbox";
+import { ProfileGate } from "@/components/story/ProfileGate";
+import { StoryImage } from "@/components/story/StoryImage";
+import { TitleCard } from "@/components/story/TitleCard";
+import { StoryNav } from "@/components/story/StoryNav";
 
 const CARD_SIZES = "(max-width: 640px) 60vw, (max-width: 1024px) 32vw, 20vw";
 
 type LightboxState = {
-  row: WedflixPhotoRow;
+  row: PhotoRow;
   index: number;
 };
 
-type WedflixExperienceProps = {
-  story: WedflixStory;
+type StoryExperienceProps = {
+  story: Story;
 };
 
-export function WedflixExperience({ story }: WedflixExperienceProps) {
+export function StoryExperience({ story }: StoryExperienceProps) {
   const [introDone, setIntroDone] = useState(false);
-  const [profile, setProfile] = useState<WedflixProfile | null>(null);
-  const [activeFilm, setActiveFilm] = useState<WedflixFilm | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [activeFilm, setActiveFilm] = useState<Film | null>(null);
   const [lightbox, setLightbox] = useState<LightboxState | null>(null);
 
   const firstFilm = story.filmRows[0]?.films[0] ?? null;
@@ -58,11 +58,11 @@ export function WedflixExperience({ story }: WedflixExperienceProps) {
   ];
 
   return (
-    <div id="top" className="min-h-screen overflow-x-hidden bg-[#14110f] text-white">
+    <div id="top" className="min-h-screen overflow-x-hidden bg-shell text-white">
       {/* Overlays sit outside this wrapper, so `inert` keeps focus from tabbing
           behind the profile gate, the film modal, or the lightbox. */}
       <div inert={isOverlayOpen}>
-        <WedflixNav
+        <StoryNav
           brandName={story.brandName}
           rowLinks={rowLinks}
           profile={profile}
@@ -94,7 +94,7 @@ export function WedflixExperience({ story }: WedflixExperienceProps) {
                       className="group block w-full text-left"
                     >
                       <span className="relative block overflow-hidden rounded transition duration-300 group-hover:scale-105 group-focus-visible:scale-105">
-                        <WedflixImage
+                        <StoryImage
                           src={`https://i.ytimg.com/vi/${film.videoId}/hqdefault.jpg`}
                           alt={film.title}
                           sizes={CARD_SIZES}
@@ -130,7 +130,7 @@ export function WedflixExperience({ story }: WedflixExperienceProps) {
                       aria-label={`Open ${row.title} gallery at photo ${card.index + 1}`}
                       className="group block w-full overflow-hidden rounded transition duration-300 hover:scale-105 focus-visible:scale-105"
                     >
-                      <WedflixImage
+                      <StoryImage
                         src={card.image}
                         alt={`${row.title} — ${card.title}`}
                         sizes={CARD_SIZES}
@@ -167,7 +167,7 @@ export function WedflixExperience({ story }: WedflixExperienceProps) {
       ) : null}
 
       {introDone ? null : (
-        <WedflixIntro brandName={story.brandName} onFinish={() => setIntroDone(true)} />
+        <TitleCard brandName={story.brandName} onFinish={() => setIntroDone(true)} />
       )}
 
       {activeFilm ? (

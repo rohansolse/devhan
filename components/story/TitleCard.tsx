@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 
-type WedflixIntroProps = {
+type TitleCardProps = {
   /** Wordmark that fades in — the couple's name, e.g. "DEVHAN". */
   brandName: string;
   /** Fired once the title card has played (or was skipped). */
   onFinish: () => void;
 };
 
-// Title-card timings (ms). `DUR` drives the CSS via the --wf-dur var.
+// Title-card timings (ms). `DUR` drives the CSS via the --title-dur var.
 const DUR = 2200;
 const LEAVE_AT = 1800;
 const FINISH_AT = 2200;
 
-export function WedflixIntro({ brandName, onFinish }: WedflixIntroProps) {
+export function TitleCard({ brandName, onFinish }: TitleCardProps) {
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
@@ -38,27 +38,27 @@ export function WedflixIntro({ brandName, onFinish }: WedflixIntroProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-[#14110f] transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-shell transition-opacity duration-500 ${
         leaving ? "opacity-0" : "opacity-100"
       }`}
-      style={{ ["--wf-dur" as string]: `${DUR}ms` }}
+      style={{ ["--title-dur" as string]: `${DUR}ms` }}
       aria-hidden
     >
-      <span className="wf-intro-word font-display uppercase text-[#d4a24c]">
+      <span className="title-word font-display uppercase text-accent">
         {brandName}
       </span>
 
       <style>{`
-        .wf-intro-word {
+        .title-word {
           position: relative;
           font-size: clamp(2.5rem, 14vw, 7.5rem);
           line-height: 1;
           opacity: 0;
           letter-spacing: 0.4em;
-          animation: wf-intro-settle var(--wf-dur) ease-out forwards;
+          animation: title-settle var(--title-dur) ease-out forwards;
         }
 
-        @keyframes wf-intro-settle {
+        @keyframes title-settle {
           0% {
             opacity: 0;
             letter-spacing: 0.4em;
@@ -77,7 +77,7 @@ export function WedflixIntro({ brandName, onFinish }: WedflixIntroProps) {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .wf-intro-word {
+          .title-word {
             animation: none;
             opacity: 1;
             letter-spacing: 0.18em;

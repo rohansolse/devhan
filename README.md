@@ -28,8 +28,8 @@ for folder naming, extra events, and picking the hero frame.
 | Path | What it is |
 |---|---|
 | [data/story.ts](data/story.ts) | Names, tagline, event list, films — the whole page's content |
-| [data/wedflix/](data/wedflix/) | Reads the event folders and builds the rows |
-| [components/wedflix/](components/wedflix/) | Intro, profile gate, billboard, rows, lightbox |
+| [data/gallery/](data/gallery/) | Reads the event folders and builds the rows |
+| [components/story/](components/story/) | Title card, profile picker, billboard, rows, lightbox |
 | [scripts/optimize-images.mjs](scripts/optimize-images.mjs) | JPG → WebP + srcset variants |
 | `data/generated/image-variants.json` | Generated srcset widths — rewritten by the optimizer, committed |
 | `data/generated/duplicates.json` | Repeated frames hidden from the rows (files stay on disk) |

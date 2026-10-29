@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WedflixExperience } from "@/components/wedflix/WedflixExperience";
+import { StoryExperience } from "@/components/story/StoryExperience";
 import { getStory } from "@/data/story";
 
 const story = getStory();
@@ -12,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <WedflixExperience story={story} />;
+  return <StoryExperience story={story} />;
 }

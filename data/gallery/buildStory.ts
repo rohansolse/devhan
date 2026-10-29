@@ -3,13 +3,13 @@ import {
   isDuplicate,
   slugifyTitle,
   toRowTitle
-} from "@/data/wedflix/sources";
+} from "@/data/gallery/sources";
 import type {
-  WedflixPhotoCard,
-  WedflixPhotoRow,
-  WedflixStory,
-  WedflixStoryConfig
-} from "@/data/wedflix/types";
+  PhotoCard,
+  PhotoRow,
+  Story,
+  StoryConfig
+} from "@/data/gallery/types";
 
 const MAX_ROW_CARDS = 14;
 const DEFAULT_RANK = "Every event, in the order it happened";
@@ -18,7 +18,7 @@ const DEFAULT_RANK = "Every event, in the order it happened";
  * Spreads the row cards evenly across the collection so the strip previews the
  * whole event instead of only its opening frames.
  */
-function toRowCards(rowId: string, images: string[]): WedflixPhotoCard[] {
+function toRowCards(rowId: string, images: string[]): PhotoCard[] {
   const step = Math.max(1, Math.ceil(images.length / MAX_ROW_CARDS));
 
   return images
@@ -38,8 +38,8 @@ function toRowCards(rowId: string, images: string[]): WedflixPhotoCard[] {
  * events, while `allFrames` keeps everything on disk, because the billboard
  * and the avatars may point at a frame the rows hide.
  */
-function readEvents(config: WedflixStoryConfig): {
-  rows: WedflixPhotoRow[];
+function readEvents(config: StoryConfig): {
+  rows: PhotoRow[];
   allFrames: string[];
 } {
   const events = config.events.map((event) => ({
@@ -75,7 +75,7 @@ function makeFramePicker(allImages: string[]) {
   };
 }
 
-export function buildStory(config: WedflixStoryConfig): WedflixStory {
+export function buildStory(config: StoryConfig): Story {
   const { rows: photoRows, allFrames } = readEvents(config);
   const pickFrame = makeFramePicker(allFrames);
 

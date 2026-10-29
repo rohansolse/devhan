@@ -2,7 +2,7 @@
 
 import { toImageSrc, toResponsiveSrcSet } from "@/data/responsiveImages";
 
-type WedflixImageProps = {
+type StoryImageProps = {
   src: string;
   alt: string;
   sizes: string;
@@ -10,13 +10,13 @@ type WedflixImageProps = {
   priority?: boolean;
 };
 
-export function WedflixImage({
+export function StoryImage({
   src,
   alt,
   sizes,
   className = "",
   priority = false
-}: WedflixImageProps) {
+}: StoryImageProps) {
   return (
     // eslint-disable-next-line @next/next/no-img-element -- static export ships plain <img> with hand-built srcsets
     <img

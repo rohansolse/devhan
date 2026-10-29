@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { WedflixImage } from "@/components/wedflix/WedflixImage";
+import { StoryImage } from "@/components/story/StoryImage";
 
 type PhotoLightboxProps = {
   title: string;
@@ -67,7 +67,7 @@ export function PhotoLightbox({
       </div>
 
       <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-6 sm:px-16">
-        <WedflixImage
+        <StoryImage
           key={images[index]}
           src={images[index]}
           alt={`${title} — photo ${index + 1}`}

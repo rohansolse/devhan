@@ -1,16 +1,16 @@
 "use client";
 
-import type { WedflixProfile } from "@/data/wedflix/types";
-import { WedflixImage } from "@/components/wedflix/WedflixImage";
+import type { Profile } from "@/data/gallery/types";
+import { StoryImage } from "@/components/story/StoryImage";
 
 type ProfileGateProps = {
-  profiles: WedflixProfile[];
-  onSelect: (profile: WedflixProfile) => void;
+  profiles: Profile[];
+  onSelect: (profile: Profile) => void;
 };
 
 export function ProfileGate({ profiles, onSelect }: ProfileGateProps) {
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#14110f] px-6">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-shell px-6">
       <h1 className="text-center text-3xl font-medium text-white sm:text-5xl lg:text-6xl">
         Who&apos;s joining the celebration?
       </h1>
@@ -26,7 +26,7 @@ export function ProfileGate({ profiles, onSelect }: ProfileGateProps) {
               className="group flex w-[8.5rem] flex-col items-center gap-3 sm:w-[7.5rem] lg:w-40"
             >
               <span className="block w-full overflow-hidden rounded-md border-2 border-transparent transition group-hover:border-white group-focus-visible:border-white">
-                <WedflixImage
+                <StoryImage
                   src={profile.image}
                   alt=""
                   sizes="(max-width: 640px) 8.5rem, (max-width: 1024px) 7.5rem, 10rem"

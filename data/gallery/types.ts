@@ -1,11 +1,11 @@
-export type WedflixProfile = {
+export type Profile = {
   id: string;
   name: string;
   /** Optimized image used as the profile avatar. */
   image: string;
 };
 
-export type WedflixPhotoCard = {
+export type PhotoCard = {
   id: string;
   title: string;
   image: string;
@@ -13,36 +13,36 @@ export type WedflixPhotoCard = {
   index: number;
 };
 
-export type WedflixPhotoRow = {
+export type PhotoRow = {
   id: string;
   title: string;
   /** Every image in the collection, used by the lightbox. */
   images: string[];
-  cards: WedflixPhotoCard[];
+  cards: PhotoCard[];
 };
 
-export type WedflixFilm = {
+export type Film = {
   id: string;
   title: string;
   videoId: string;
   description: string;
 };
 
-export type WedflixFilmRow = {
+export type FilmRow = {
   id: string;
   title: string;
-  films: WedflixFilm[];
+  films: Film[];
 };
 
 /** One event row. Images come from `source-images/events/<folder>/`. */
-export type WedflixEventConfig = {
+export type EventConfig = {
   /** Folder name under source-images/events, ordering prefix included. */
   folder: string;
   /** Overrides the title derived from the folder name. */
   title?: string;
 };
 
-export type WedflixFilmConfig = {
+export type FilmConfig = {
   id: string;
   title: string;
   videoId: string;
@@ -50,10 +50,10 @@ export type WedflixFilmConfig = {
 };
 
 /**
- * Everything about this wedding. `buildStory` turns it into the `WedflixStory`
+ * Everything about this wedding. `buildStory` turns it into the `Story`
  * the page renders.
  */
-export type WedflixStoryConfig = {
+export type StoryConfig = {
   brandName: string;
   brideName: string;
   groomName: string;
@@ -65,11 +65,11 @@ export type WedflixStoryConfig = {
   billboard?: string;
   /** Profile names mapped to filename stems from any of the events. */
   profiles: { name: string; frame?: string }[];
-  films?: { title: string; items: WedflixFilmConfig[] }[];
-  events: WedflixEventConfig[];
+  films?: { title: string; items: FilmConfig[] }[];
+  events: EventConfig[];
 };
 
-export type WedflixStory = {
+export type Story = {
   brandName: string;
   brideName: string;
   groomName: string;
@@ -79,7 +79,7 @@ export type WedflixStory = {
   genres: string[];
   /** Null until at least one event folder has optimized images. */
   billboardImage: string | null;
-  profiles: WedflixProfile[];
-  filmRows: WedflixFilmRow[];
-  photoRows: WedflixPhotoRow[];
+  profiles: Profile[];
+  filmRows: FilmRow[];
+  photoRows: PhotoRow[];
 };

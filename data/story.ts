@@ -1,5 +1,5 @@
-import { buildStory } from "@/data/wedflix/buildStory";
-import type { WedflixStoryConfig } from "@/data/wedflix/types";
+import { buildStory } from "@/data/gallery/buildStory";
+import type { StoryConfig } from "@/data/gallery/types";
 
 /**
  * The whole site in one file. Add an event by creating its folder under
@@ -7,7 +7,7 @@ import type { WedflixStoryConfig } from "@/data/wedflix/types";
  * Folder order prefixes (`01-`) set the order on the page and are stripped from
  * the title, so `03-haldi-rohan` becomes "Haldi Rohan" unless `title` overrides it.
  */
-const storyConfig: WedflixStoryConfig = {
+const storyConfig: StoryConfig = {
   brandName: "DEVHAN",
   brideName: "Devani",
   groomName: "Rohan",
