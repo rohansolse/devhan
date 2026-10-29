@@ -43,6 +43,22 @@ Titles come from `data/story.ts`, so change them there.
 An event folder with no photos yet is simply left off the page, so all five can
 be listed before they are shot.
 
+## Repeated photos
+
+Burst frames of the same pose are detected by the optimizer (a perceptual hash,
+Hamming distance <= 8) and listed in `data/generated/duplicates.json`. The files
+stay on disk — they are only left out of the rows and the lightbox, so each pose
+shows once. The first frame of every burst is the one kept.
+
+Too aggressive or too lax? Re-run with a different threshold:
+
+```bash
+IMAGE_DUPLICATE_THRESHOLD=6 npm run images:optimize   # hides fewer
+```
+
+A hand-picked `billboard` or avatar `frame` still works even if that exact
+photo is on the skip list.
+
 ## Picking the hero and the profile avatars
 
 Both are chosen by **filename stem** — `_RJL5250.jpg` is the stem `_RJL5250`.

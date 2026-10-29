@@ -32,6 +32,7 @@ for folder naming, extra events, and picking the hero frame.
 | [components/wedflix/](components/wedflix/) | Intro, profile gate, billboard, rows, lightbox |
 | [scripts/optimize-images.mjs](scripts/optimize-images.mjs) | JPG → WebP + srcset variants |
 | `data/generated/image-variants.json` | Generated srcset widths — rewritten by the optimizer, committed |
+| `data/generated/duplicates.json` | Repeated frames hidden from the rows (files stay on disk) |
 | `source-images/events/` | Raw edited JPGs (not committed) |
 | `public/images/optimized/events/` | Generated WebPs (committed, deployed) |
 
