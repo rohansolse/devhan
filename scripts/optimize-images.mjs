@@ -39,7 +39,22 @@ const manifestPath = path.join(
   "generated",
   "image-variants.json"
 );
+const duplicatesPath = path.join(
+  projectRoot,
+  "data",
+  "generated",
+  "duplicates.json"
+);
 const manifest = {};
+
+// Near-duplicate detection: burst frames of the same pose are kept on disk but
+// hidden from the page. 8 bits of a 64-bit dHash is the line that held on the
+// pre-wedding set — distinct photos started colliding at 9.
+const requestedThreshold = Number(process.env.IMAGE_DUPLICATE_THRESHOLD);
+const duplicateThreshold = Number.isFinite(requestedThreshold)
+  ? requestedThreshold
+  : 8;
+const duplicates = [];
 
 function toVariantPath(fullWebpPath, width) {
   return fullWebpPath.replace(/\.webp$/, `.w${width}.webp`);
@@ -51,6 +66,66 @@ function toPublicPath(absolutePath) {
     .relative(path.join(projectRoot, "public"), absolutePath)
     .split(path.sep)
     .join("/")}`;
+}
+
+/**
+ * 64-bit difference hash: each bit says whether a pixel is brighter than the
+ * one to its right in a 9x8 greyscale thumbnail. Near-identical frames land a
+ * few bits apart, so Hamming distance measures "same photo again".
+ */
+async function perceptualHash(filePath) {
+  const pixels = await sharp(filePath)
+    .greyscale()
+    .resize(9, 8, { fit: "fill" })
+    .raw()
+    .toBuffer();
+
+  let bits = 0n;
+
+  for (let y = 0; y < 8; y += 1) {
+    for (let x = 0; x < 8; x += 1) {
+      bits = (bits << 1n) | (pixels[y * 9 + x] > pixels[y * 9 + x + 1] ? 1n : 0n);
+    }
+  }
+
+  return bits;
+}
+
+function hammingDistance(a, b) {
+  let remaining = a ^ b;
+  let distance = 0;
+
+  while (remaining) {
+    distance += Number(remaining & 1n);
+    remaining >>= 1n;
+  }
+
+  return distance;
+}
+
+/**
+ * Walks the images in display order and marks each one that is within the
+ * threshold of an earlier keeper, so the first shot of every burst survives.
+ */
+async function collectDuplicates(fullWebpFiles) {
+  const kept = [];
+
+  for (const filePath of [...fullWebpFiles].sort((a, b) =>
+    a.localeCompare(b, "en", { numeric: true })
+  )) {
+    // Hash the full-size file, not a variant: the already-downscaled variant
+    // blurs detail and pushes distinct frames inside the threshold.
+    const hash = await perceptualHash(filePath);
+    const match = kept.find(
+      (keeper) => hammingDistance(keeper.hash, hash) <= duplicateThreshold
+    );
+
+    if (match) {
+      duplicates.push(toPublicPath(filePath));
+    } else {
+      kept.push({ hash });
+    }
+  }
 }
 
 async function measureWidth(filePath) {
@@ -243,6 +318,13 @@ async function optimizeRoot(root) {
   console.log(
     `Responsive variants up to date for ${fullWebpFiles.length} ${root.name} images (widths ${variantWidths.join(", ")}, ${generated} regenerated).`
   );
+
+  const before = duplicates.length;
+  await collectDuplicates(fullWebpFiles);
+
+  console.log(
+    `Hid ${duplicates.length - before} near-duplicate ${root.name} images (hamming <= ${duplicateThreshold}); files stay on disk.`
+  );
 }
 
 async function main() {
@@ -258,7 +340,14 @@ async function main() {
     `${JSON.stringify(Object.fromEntries(Object.entries(manifest).sort()), null, 2)}\n`
   );
 
-  console.log(`Wrote srcset manifest for ${Object.keys(manifest).length} images.`);
+  await writeFile(
+    duplicatesPath,
+    `${JSON.stringify([...duplicates].sort(), null, 2)}\n`
+  );
+
+  console.log(
+    `Wrote srcset manifest for ${Object.keys(manifest).length} images and a skip list of ${duplicates.length}.`
+  );
 }
 
 main().catch((error) => {

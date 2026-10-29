@@ -1,4 +1,9 @@
-import { fromEventFolder, slugifyTitle, toRowTitle } from "@/data/wedflix/sources";
+import {
+  fromEventFolder,
+  isDuplicate,
+  slugifyTitle,
+  toRowTitle
+} from "@/data/wedflix/sources";
 import type {
   WedflixPhotoCard,
   WedflixPhotoRow,
@@ -28,14 +33,28 @@ function toRowCards(rowId: string, images: string[]): WedflixPhotoCard[] {
     }));
 }
 
-/** Events with no optimized photos yet are left off the page entirely. */
+/**
+ * Every frame on disk, before near-duplicates are dropped — the billboard and
+ * the avatars may point at one of them.
+ */
+function buildAllFrames(config: WedflixStoryConfig): string[] {
+  return config.events.flatMap((event) => fromEventFolder(event.folder));
+}
+
+/**
+ * Events with no optimized photos yet are left off the page entirely, and
+ * near-duplicate frames are left out of the rows and the lightbox.
+ */
 function buildRows(config: WedflixStoryConfig): WedflixPhotoRow[] {
   return config.events
     .map((event) => {
       const title = event.title ?? toRowTitle(event.folder);
       const id = slugifyTitle(event.folder);
+      const images = fromEventFolder(event.folder).filter(
+        (image) => !isDuplicate(image)
+      );
 
-      return { id, title, images: fromEventFolder(event.folder) };
+      return { id, title, images };
     })
     .filter((row) => row.images.length > 0)
     .map((row) => ({ ...row, cards: toRowCards(row.id, row.images) }));
@@ -47,9 +66,7 @@ function buildRows(config: WedflixStoryConfig): WedflixPhotoRow[] {
  * a frame from the rows when the stem is unset or no longer on disk, so the
  * page keeps working while photos are still being added.
  */
-function makeFramePicker(rows: WedflixPhotoRow[]) {
-  const allImages = rows.flatMap((row) => row.images);
-
+function makeFramePicker(allImages: string[]) {
   return (stem: string | undefined, fallbackIndex: number) => {
     const picked = stem
       ? allImages.find((imagePath) => imagePath.includes(`/${stem}.`))
@@ -61,7 +78,7 @@ function makeFramePicker(rows: WedflixPhotoRow[]) {
 
 export function buildStory(config: WedflixStoryConfig): WedflixStory {
   const photoRows = buildRows(config);
-  const pickFrame = makeFramePicker(photoRows);
+  const pickFrame = makeFramePicker(buildAllFrames(config));
 
   return {
     brandName: config.brandName,

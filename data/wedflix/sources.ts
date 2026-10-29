@@ -1,5 +1,6 @@
 import { readdirSync } from "node:fs";
 import path from "node:path";
+import duplicateImages from "@/data/generated/duplicates.json";
 
 export const EVENTS_PUBLIC_PREFIX = "/images/optimized/events";
 
@@ -15,6 +16,17 @@ const EVENTS_OUTPUT_DIR = path.join(
 const VARIANT_PATTERN = /\.w\d+\.webp$/;
 /** Folders are ordered with a `01-` style prefix, which is not part of the title. */
 const ORDER_PREFIX_PATTERN = /^\d+[-_]/;
+
+/**
+ * Near-duplicate frames found by the optimizer. The files stay on disk (and in
+ * the srcset manifest) so a hand-picked billboard or avatar still resolves —
+ * they are only left out of the rows and the lightbox.
+ */
+const duplicateSet = new Set<string>(duplicateImages as string[]);
+
+export function isDuplicate(imagePath: string) {
+  return duplicateSet.has(imagePath);
+}
 
 function readDirSafe(dir: string) {
   try {
