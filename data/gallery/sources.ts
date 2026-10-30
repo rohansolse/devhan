@@ -20,7 +20,7 @@ const ORDER_PREFIX_PATTERN = /^\d+[-_]/;
 /**
  * Near-duplicate frames found by the optimizer. The files stay on disk (and in
  * the srcset manifest) so a hand-picked billboard or avatar still resolves —
- * they are only left out of the rows and the lightbox.
+ * they are only left out of the grids and the lightbox.
  */
 const duplicateSet = new Set<string>(duplicateImages as string[]);
 

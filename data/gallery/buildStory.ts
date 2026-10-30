@@ -5,58 +5,70 @@ import {
   toRowTitle
 } from "@/data/gallery/sources";
 import type {
-  PhotoCard,
   PhotoRow,
+  PhotoSection,
   Story,
   StoryConfig
 } from "@/data/gallery/types";
 
-const MAX_ROW_CARDS = 14;
 const DEFAULT_RANK = "Every event, in the order it happened";
 
 /**
- * Spreads the row cards evenly across the collection so the strip previews the
- * whole event instead of only its opening frames.
+ * Collects the rows into the chips shown by the event browser, keeping the
+ * order the events are configured in. Events that share a `group` land in one
+ * section and keep their own rows, so "Haldi" holds both haldis.
  */
-function toRowCards(rowId: string, images: string[]): PhotoCard[] {
-  const step = Math.max(1, Math.ceil(images.length / MAX_ROW_CARDS));
+function toSections(
+  events: { group: string; row: PhotoRow }[]
+): PhotoSection[] {
+  const sections: PhotoSection[] = [];
 
-  return images
-    .map((image, index) => ({ image, index }))
-    .filter(({ index }) => index % step === 0)
-    .slice(0, MAX_ROW_CARDS)
-    .map(({ image, index }, position) => ({
-      id: `${rowId}-${position}`,
-      title: `Frame ${position + 1}`,
-      image,
-      index
-    }));
+  for (const { group, row } of events) {
+    const id = slugifyTitle(group);
+    const existing = sections.find((section) => section.id === id);
+
+    if (existing) {
+      existing.rows.push(row);
+    } else {
+      sections.push({ id, title: group, rows: [row] });
+    }
+  }
+
+  return sections;
 }
 
 /**
- * Reads each event folder once. `rows` drop near-duplicate frames and empty
- * events, while `allFrames` keeps everything on disk, because the billboard
- * and the avatars may point at a frame the rows hide.
+ * Reads each event folder once. `sections` drop near-duplicate frames and
+ * empty events, while `allFrames` keeps everything on disk, because the
+ * billboard and the avatars may point at a frame the rows hide.
  */
 function readEvents(config: StoryConfig): {
-  rows: PhotoRow[];
+  sections: PhotoSection[];
   allFrames: string[];
 } {
-  const events = config.events.map((event) => ({
-    id: slugifyTitle(event.folder),
-    title: event.title ?? toRowTitle(event.folder),
-    images: fromEventFolder(event.folder)
-  }));
+  const events = config.events.map((event) => {
+    const title = event.title ?? toRowTitle(event.folder);
+
+    return {
+      id: slugifyTitle(event.folder),
+      title,
+      group: event.group ?? title,
+      images: fromEventFolder(event.folder)
+    };
+  });
 
   const rows = events
     .map((event) => ({
       ...event,
       images: event.images.filter((image) => !isDuplicate(image))
     }))
-    .filter((row) => row.images.length > 0)
-    .map((row) => ({ ...row, cards: toRowCards(row.id, row.images) }));
+    .filter((event) => event.images.length > 0)
+    .map(({ group, ...row }) => ({ group, row }));
 
-  return { rows, allFrames: events.flatMap((event) => event.images) };
+  return {
+    sections: toSections(rows),
+    allFrames: events.flatMap((event) => event.images)
+  };
 }
 
 /**
@@ -76,7 +88,7 @@ function makeFramePicker(allImages: string[]) {
 }
 
 export function buildStory(config: StoryConfig): Story {
-  const { rows: photoRows, allFrames } = readEvents(config);
+  const { sections: photoSections, allFrames } = readEvents(config);
   const pickFrame = makeFramePicker(allFrames);
 
   return {
@@ -102,6 +114,6 @@ export function buildStory(config: StoryConfig): Story {
       title: filmRow.title,
       films: filmRow.items
     })),
-    photoRows
+    photoSections
   };
 }

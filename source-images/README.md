@@ -1,7 +1,7 @@
 # Source images
 
-Drop the edited JPGs for each event here, run the optimizer, and the row shows
-up on the page.
+Drop the edited JPGs for each event here, run the optimizer, and the event
+shows up on the page.
 
 ```
 source-images/events/<nn-event-name>/*.jpg
@@ -23,21 +23,30 @@ are your working copies and stay out of git.
 
 ## The event folders
 
-| Folder | Row title on the page |
-|---|---|
-| `01-pre-wedding` | Pre-Wedding |
-| `02-engagement` | Engagement |
-| `03-haldi-rohan` | Haldi — Rohan |
-| `04-haldi-devani` | Haldi — Devani |
-| `05-wedding` | The Wedding |
+| Folder | Chip on the page | Heading inside it |
+|---|---|---|
+| `01-pre-wedding` | Pre-Wedding | — |
+| `02-engagement` | Engagement | — |
+| `03-haldi-rohan` | Haldi | Rohan |
+| `04-haldi-devani` | Haldi | Devyani |
+| `05-wedding` | The Wedding | — |
 
 The numeric prefix sets the order on the page and is stripped from the title.
 Titles come from `data/story.ts`, so change them there.
 
+Events given the same `group` share one chip and keep their own heading inside
+it, which is how both haldis sit under a single "Haldi":
+
+```ts
+{ folder: "03-haldi-rohan", title: "Rohan", group: "Haldi" },
+{ folder: "04-haldi-devani", title: "Devyani", group: "Haldi" },
+```
+
 ## Adding another event
 
 1. Create `source-images/events/06-sangeet/` (next number) and add the JPGs.
-2. Add `{ folder: "06-sangeet", title: "Sangeet" }` to `events` in `data/story.ts`.
+2. Add `{ folder: "06-sangeet", title: "Sangeet" }` to `events` in `data/story.ts`
+   (add `group` to put it under an existing chip).
 3. Run `npm run images:optimize`.
 
 An event folder with no photos yet is simply left off the page, so all five can
@@ -47,7 +56,7 @@ be listed before they are shot.
 
 Burst frames of the same pose are detected by the optimizer and listed in
 `data/generated/duplicates.json`. The files stay on disk — they are only left
-out of the rows and the lightbox, so each pose shows once. The first frame of
+out of the grids and the lightbox, so each pose shows once. The first frame of
 every burst is the one kept.
 
 Two signals have to agree before a frame is called a repeat:

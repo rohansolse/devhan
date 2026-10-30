@@ -1,8 +1,9 @@
 # Devhan
 
-A private page for Devani & Rohan's wedding — one scrollable row per event, a
-full-screen lightbox per gallery, and a title card before the profile picker.
-Built with Next.js as a static export.
+A private page for Devyani & Rohan's wedding — a billboard, a chip per event
+("Pre-Wedding", "Engagement", "Haldi", "The Wedding") with that event's photos
+in a grid below, a full-screen lightbox per gallery, and a title card before
+the profile picker. Built with Next.js as a static export.
 
 ## Running it
 
@@ -17,7 +18,7 @@ npm run dev          # http://localhost:3000
    pre-wedding, engagement, both haldis and the wedding already exist.
 2. `npm run images:optimize` — converts everything to WebP plus the `.w480` /
    `.w1080` srcset variants under `public/images/optimized/events/`.
-3. `npm run dev` and the row appears.
+3. `npm run dev` and the event's chip appears.
 
 Events with no photos yet are left off the page, so nothing breaks while the
 shoots are still coming in. See [source-images/README.md](source-images/README.md)
@@ -28,11 +29,11 @@ for folder naming, extra events, and picking the hero frame.
 | Path | What it is |
 |---|---|
 | [data/story.ts](data/story.ts) | Names, tagline, event list, films — the whole page's content |
-| [data/gallery/](data/gallery/) | Reads the event folders and builds the rows |
-| [components/story/](components/story/) | Title card, profile picker, billboard, rows, lightbox |
+| [data/gallery/](data/gallery/) | Reads the event folders and builds the sections |
+| [components/story/](components/story/) | Title card, profile picker, billboard, event browser, lightbox |
 | [scripts/optimize-images.mjs](scripts/optimize-images.mjs) | JPG → WebP + srcset variants |
 | `data/generated/image-variants.json` | Generated srcset widths — rewritten by the optimizer, committed |
-| `data/generated/duplicates.json` | Repeated frames hidden from the rows (files stay on disk) |
+| `data/generated/duplicates.json` | Repeated frames hidden from the grids (files stay on disk) |
 | `source-images/events/` | Raw edited JPGs (not committed) |
 | `public/images/optimized/events/` | Generated WebPs (committed, deployed) |
 

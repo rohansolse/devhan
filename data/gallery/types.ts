@@ -5,20 +5,21 @@ export type Profile = {
   image: string;
 };
 
-export type PhotoCard = {
-  id: string;
-  title: string;
-  image: string;
-  /** Position of this frame within the row's full `images` list. */
-  index: number;
-};
-
+/** One event's photos, shown as a grid and paged through in the lightbox. */
 export type PhotoRow = {
   id: string;
   title: string;
-  /** Every image in the collection, used by the lightbox. */
   images: string[];
-  cards: PhotoCard[];
+};
+
+/**
+ * One chip in the event browser. Usually a single event, but several events
+ * share a section when they share a `group` — both haldis, for instance.
+ */
+export type PhotoSection = {
+  id: string;
+  title: string;
+  rows: PhotoRow[];
 };
 
 export type Film = {
@@ -40,6 +41,11 @@ export type EventConfig = {
   folder: string;
   /** Overrides the title derived from the folder name. */
   title?: string;
+  /**
+   * Events sharing a group become one chip in the event browser, each keeping
+   * its own sub-heading. Unset means the event is its own chip.
+   */
+  group?: string;
 };
 
 export type FilmConfig = {
@@ -81,5 +87,5 @@ export type Story = {
   billboardImage: string | null;
   profiles: Profile[];
   filmRows: FilmRow[];
-  photoRows: PhotoRow[];
+  photoSections: PhotoSection[];
 };

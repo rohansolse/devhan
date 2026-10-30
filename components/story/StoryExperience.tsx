@@ -9,6 +9,7 @@ import type {
 } from "@/data/gallery/types";
 import { Billboard } from "@/components/story/Billboard";
 import { CardRow } from "@/components/story/CardRow";
+import { EVENT_BROWSER_ID, EventBrowser } from "@/components/story/EventBrowser";
 import { FilmModal } from "@/components/story/FilmModal";
 import { PhotoLightbox } from "@/components/story/PhotoLightbox";
 import { ProfileGate } from "@/components/story/ProfileGate";
@@ -21,6 +22,8 @@ const CARD_SIZES = "(max-width: 640px) 60vw, (max-width: 1024px) 32vw, 20vw";
 type LightboxState = {
   row: PhotoRow;
   index: number;
+  /** "Haldi — Rohan" rather than the row's bare "Rohan". */
+  title: string;
 };
 
 type StoryExperienceProps = {
@@ -32,6 +35,16 @@ export function StoryExperience({ story }: StoryExperienceProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [activeFilm, setActiveFilm] = useState<Film | null>(null);
   const [lightbox, setLightbox] = useState<LightboxState | null>(null);
+  const [activeSectionId, setActiveSectionId] = useState(
+    story.photoSections[0]?.id ?? ""
+  );
+
+  const showSection = (id: string) => {
+    setActiveSectionId(id);
+    document
+      .getElementById(EVENT_BROWSER_ID)
+      ?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const firstFilm = story.filmRows[0]?.films[0] ?? null;
   // The gate only makes sense once there are avatars to show, which needs photos.
@@ -54,7 +67,11 @@ export function StoryExperience({ story }: StoryExperienceProps) {
 
   const rowLinks = [
     ...story.filmRows.map((row) => ({ id: row.id, title: row.title })),
-    ...story.photoRows.map((row) => ({ id: row.id, title: row.title }))
+    ...story.photoSections.map((section) => ({
+      id: section.id,
+      title: section.title,
+      onSelect: () => showSection(section.id)
+    }))
   ];
 
   return (
@@ -75,7 +92,7 @@ export function StoryExperience({ story }: StoryExperienceProps) {
             onPlay={firstFilm ? () => setActiveFilm(firstFilm) : undefined}
             onMoreInfo={() => {
               document
-                .getElementById(story.photoRows[0]?.id ?? "")
+                .getElementById(EVENT_BROWSER_ID)
                 ?.scrollIntoView({ behavior: "smooth" });
             }}
           />
@@ -117,33 +134,17 @@ export function StoryExperience({ story }: StoryExperienceProps) {
               </CardRow>
             ))}
 
-            {story.photoRows.map((row) => (
-              <CardRow key={row.id} id={row.id} title={row.title}>
-                {row.cards.map((card) => (
-                  <li
-                    key={card.id}
-                    className="w-[60vw] shrink-0 snap-start sm:w-[32vw] lg:w-[20vw]"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setLightbox({ row, index: card.index })}
-                      aria-label={`Open ${row.title} gallery at photo ${card.index + 1}`}
-                      className="group block w-full overflow-hidden rounded transition duration-300 hover:scale-105 focus-visible:scale-105"
-                    >
-                      <StoryImage
-                        src={card.image}
-                        alt={`${row.title} — ${card.title}`}
-                        sizes={CARD_SIZES}
-                        className="aspect-video w-full object-cover"
-                      />
-                    </button>
-                  </li>
-                ))}
-              </CardRow>
-            ))}
+            <EventBrowser
+              sections={story.photoSections}
+              activeId={activeSectionId}
+              onActiveIdChange={setActiveSectionId}
+              onOpenPhoto={(row, index, title) =>
+                setLightbox({ row, index, title })
+              }
+            />
 
             {/* Before the first shoot is added there is nothing to scroll. */}
-            {story.photoRows.length ? null : (
+            {story.photoSections.length ? null : (
               <p className="px-4 py-16 text-center text-sm text-white/60 sm:px-8">
                 Photos are being added — the events will appear here as each
                 shoot is edited.
@@ -176,10 +177,10 @@ export function StoryExperience({ story }: StoryExperienceProps) {
 
       {lightbox ? (
         <PhotoLightbox
-          title={lightbox.row.title}
+          title={lightbox.title}
           images={lightbox.row.images}
           index={lightbox.index}
-          onIndexChange={(index) => setLightbox({ row: lightbox.row, index })}
+          onIndexChange={(index) => setLightbox({ ...lightbox, index })}
           onClose={() => setLightbox(null)}
         />
       ) : null}

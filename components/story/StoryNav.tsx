@@ -5,9 +5,16 @@ import { useEffect, useState } from "react";
 import type { Profile } from "@/data/gallery/types";
 import { StoryImage } from "@/components/story/StoryImage";
 
+export type RowLink = {
+  id: string;
+  title: string;
+  /** Set for the event chips, which select a section instead of jumping. */
+  onSelect?: () => void;
+};
+
 type StoryNavProps = {
   brandName: string;
-  rowLinks: { id: string; title: string }[];
+  rowLinks: RowLink[];
   profile: Profile | null;
   onSwitchProfile: () => void;
 };
@@ -50,12 +57,22 @@ export function StoryNav({
           <ul className="flex min-w-0 items-center gap-4 overflow-x-auto text-sm text-white/85 sm:gap-6 [&::-webkit-scrollbar]:hidden">
             {rowLinks.map((row) => (
               <li key={row.id}>
-                <a
-                  href={`#${row.id}`}
-                  className="whitespace-nowrap transition hover:text-white/60"
-                >
-                  {row.title}
-                </a>
+                {row.onSelect ? (
+                  <button
+                    type="button"
+                    onClick={row.onSelect}
+                    className="whitespace-nowrap transition hover:text-white/60"
+                  >
+                    {row.title}
+                  </button>
+                ) : (
+                  <a
+                    href={`#${row.id}`}
+                    className="whitespace-nowrap transition hover:text-white/60"
+                  >
+                    {row.title}
+                  </a>
+                )}
               </li>
             ))}
           </ul>

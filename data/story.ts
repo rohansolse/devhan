@@ -9,7 +9,7 @@ import type { StoryConfig } from "@/data/gallery/types";
  */
 const storyConfig: StoryConfig = {
   brandName: "DEVHAN",
-  brideName: "Devani",
+  brideName: "Devyani",
   groomName: "Rohan",
   seriesTitle: "A Love Story in Five Parts",
   tagline:
@@ -20,7 +20,7 @@ const storyConfig: StoryConfig = {
   billboard: "_MG_2973",
   profiles: [
     { name: "Rohan", frame: "_MG_2712" },
-    { name: "Devani", frame: "_MG_2565" },
+    { name: "Devyani", frame: "_MG_2565" },
     { name: "Family", frame: "_MG_2526" },
     { name: "Friends", frame: "_MG_2489" }
   ],
@@ -29,8 +29,10 @@ const storyConfig: StoryConfig = {
   events: [
     { folder: "01-pre-wedding", title: "Pre-Wedding" },
     { folder: "02-engagement", title: "Engagement" },
-    { folder: "03-haldi-rohan", title: "Haldi — Rohan" },
-    { folder: "04-haldi-devani", title: "Haldi — Devani" },
+    // Both haldis share one "Haldi" chip and keep their own sub-chips, in the
+    // order listed here — Devyani's is first, so it is the one preselected.
+    { folder: "04-haldi-devani", title: "Devyani", group: "Haldi" },
+    { folder: "03-haldi-rohan", title: "Rohan", group: "Haldi" },
     { folder: "05-wedding", title: "The Wedding" }
   ]
 };
